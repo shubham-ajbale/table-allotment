@@ -41,10 +41,14 @@ font-weight:bold;
 cursor:pointer;
 }
 
+button:disabled{
+background:gray;
+}
+
 #result{
 margin-top:15px;
-font-weight:bold;
 min-height:25px;
+font-weight:bold;
 }
 </style>
 </head>
@@ -54,50 +58,69 @@ min-height:25px;
 <div class="container">
 <h2>Get Your Table Number</h2>
 
-<form id="form"
-action="https://script.google.com/macros/s/AKfycbw-HMPtwRpBBVcxFKakxe7DZy_skPOqgTzU9_eJ0dPrBjoQurTSz8Jv-M5eiB7bikcc/exec"
-method="GET"
-target="hidden_iframe"
-onsubmit="return handleSubmit()">
-
-<select name="category" id="category">
+<select id="category">
 <option>Project Competition</option>
 <option>Poster Competition</option>
 <option>Paper Presentation</option>
 </select>
 
-<input type="text" name="title" id="title" placeholder="Enter Your Title" required>
+<input type="text" id="title" placeholder="Enter Your Title">
 
-<button type="submit">Get Table</button>
-
-</form>
+<button id="btn" onclick="allot()">Get Table</button>
 
 <div id="result"></div>
-
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 </div>
 
 <script>
 
-function handleSubmit(){
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-HMPtwRpBBVcxFKakxe7DZy_skPOqgTzU9_eJ0dPrBjoQurTSz8Jv-M5eiB7bikcc/exec";
 
-let title = document.getElementById("title").value.trim();
+async function allot(){
 
-if(title.length < 3){
+let category=document.getElementById("category").value;
+let title=document.getElementById("title").value.trim();
+let btn=document.getElementById("btn");
+
+if(title.length<3){
 alert("Enter valid title");
-return false;
+return;
 }
 
+btn.disabled=true;
 document.getElementById("result").innerHTML="Assigning...";
 
-setTimeout(()=>{
-document.getElementById("result").innerHTML=
-"✅ Table Assigned!<br>Check confirmation above if needed.";
-document.getElementById("title").value="";
-},1500);
+try{
 
-return true;
+let url = SCRIPT_URL +
+"?category=" + encodeURIComponent(category) +
+"&title=" + encodeURIComponent(title);
+
+let response = await fetch(url);
+let data = await response.json();
+
+if(data.status==="duplicate"){
+document.getElementById("result").innerHTML="⚠ Title already registered!";
+btn.disabled=false;
+}
+else if(data.status==="full"){
+document.getElementById("result").innerHTML="❌ No tables available.";
+btn.disabled=false;
+}
+else if(data.status==="success"){
+document.getElementById("result").innerHTML=
+"✅ Your Table Number:<br><span style='font-size:30px'>" + data.table + "</span>";
+document.getElementById("title").value="";
+}
+else{
+document.getElementById("result").innerHTML="❌ Unexpected response.";
+btn.disabled=false;
+}
+
+}catch(err){
+document.getElementById("result").innerHTML="❌ Network issue.";
+btn.disabled=false;
+}
+
 }
 
 </script>
