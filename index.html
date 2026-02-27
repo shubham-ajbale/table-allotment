@@ -72,15 +72,9 @@ font-weight:bold;
 
 <script>
 
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbxz_0KZs1kBscfcmUZN71hFCpJLfKdPt2vmSAW3q7eydkKGpozg-84sEaYO138lPsq6/exec";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbxVSVmiwCq4TKpaMWY7dfsZaBtj_PB2d-j91M6RWLGfLjoQN8LrGxjOUnX8n6PmfSG9/exec";
 
 let submitting=false;
-
-let deviceId = localStorage.getItem("deviceId");
-if(!deviceId){
-deviceId = Date.now()+"_"+Math.random();
-localStorage.setItem("deviceId", deviceId);
-}
 
 async function allot(){
 
@@ -103,16 +97,21 @@ try{
 
 let response=await fetch(SCRIPT_URL,{
 method:"POST",
-body:JSON.stringify({category,title,deviceId})
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({category,title})
 });
 
 let data=await response.json();
 
 if(data.status==="duplicate"){
 document.getElementById("result").innerHTML="⚠ Title already registered!";
+btn.disabled=false;
 }
 else if(data.status==="full"){
 document.getElementById("result").innerHTML="❌ No tables available.";
+btn.disabled=false;
 }
 else if(data.status==="success"){
 document.getElementById("result").innerHTML=
@@ -120,14 +119,15 @@ document.getElementById("result").innerHTML=
 document.getElementById("title").value="";
 }
 else{
-document.getElementById("result").innerHTML="❌ Error. Try again.";
+document.getElementById("result").innerHTML="❌ Error occurred.";
+btn.disabled=false;
 }
 
 }catch(err){
 document.getElementById("result").innerHTML="❌ Network issue.";
+btn.disabled=false;
 }
 
-btn.disabled=false;
 submitting=false;
 }
 
