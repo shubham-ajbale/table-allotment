@@ -5,25 +5,51 @@
 <title>Competition Table Allotment</title>
 
 <style>
+
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial, sans-serif;
 background:linear-gradient(135deg,#1e3c72,#2a5298);
+color:white;
+}
+
+/* ===== HEADER ===== */
+
+.header{
+width:100%;
+background:white;
+text-align:center;
+padding:10px 0;
+}
+
+.header img{
+max-width:100%;
+height:auto;
+}
+
+/* ===== MAIN CONTAINER ===== */
+
+.main{
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-color:white;
+min-height:80vh;
+padding:20px;
 }
 
 .container{
 background:rgba(255,255,255,0.1);
 padding:25px;
 border-radius:15px;
-width:90%;
-max-width:380px;
+width:100%;
+max-width:400px;
 text-align:center;
 box-shadow:0 0 20px rgba(0,0,0,0.4);
+backdrop-filter:blur(8px);
+}
+
+h2{
+margin-top:0;
 }
 
 select,input,button{
@@ -50,13 +76,42 @@ margin-top:15px;
 min-height:25px;
 font-weight:bold;
 }
+
+/* ===== MOBILE OPTIMIZATION ===== */
+
+@media(max-width:480px){
+
+.container{
+padding:20px;
+}
+
+h2{
+font-size:18px;
+}
+
+select,input,button{
+font-size:14px;
+}
+
+}
+
 </style>
 </head>
 
 <body>
 
+<!-- ===== HEADER SECTION ===== -->
+
+<div class="header">
+<img src="wcem.jpeg" alt="WCEM Header">
+</div>
+
+<!-- ===== FORM SECTION ===== -->
+
+<div class="main">
 <div class="container">
-<h2>Get Your Table Number</h2>
+
+<h2>Get Your Table Number For Technical Event - Synergy-26</h2>
 
 <select id="category">
 <option>Project Competition</option>
@@ -69,11 +124,12 @@ font-weight:bold;
 <button id="btn" onclick="allot()">Get Table</button>
 
 <div id="result"></div>
+
+</div>
 </div>
 
 <script>
 
-// ⚠ Use your latest deployment URL
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2gvw0XWd78ilGUwa7sFf5LWVPzlAMY4Hv3m0wCt7mdAeP7FW0agJdnKSHJ6fEVV9m/exec";
 
 async function allot(){
@@ -92,12 +148,11 @@ document.getElementById("result").innerHTML="Assigning...";
 
 try{
 
-// Send parameters using GET (matches doGet backend)
 let url = SCRIPT_URL +
 "?category=" + encodeURIComponent(category) +
 "&title=" + encodeURIComponent(title);
 
-let response = await fetch(url);
+let response = await fetch(url + "&_=" + new Date().getTime());
 let data = await response.json();
 
 if(data.status==="duplicate"){
@@ -113,12 +168,8 @@ document.getElementById("result").innerHTML=
 "✅ Your Table Number:<br><span style='font-size:30px'>" + data.table + "</span>";
 document.getElementById("title").value="";
 }
-else if(data.status==="running"){
-document.getElementById("result").innerHTML="⚠ Please try again.";
-btn.disabled=false;
-}
 else{
-document.getElementById("result").innerHTML="❌ Unexpected response.";
+document.getElementById("result").innerHTML="❌ Please try again.";
 btn.disabled=false;
 }
 
