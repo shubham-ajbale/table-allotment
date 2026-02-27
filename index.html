@@ -95,12 +95,12 @@ document.getElementById("result").innerHTML="Assigning...";
 
 try{
 
-let response=await fetch(SCRIPT_URL,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({category,title})
+let response = await fetch(SCRIPT_URL, {
+  method: "POST",
+  body: new URLSearchParams({
+    category: category,
+    title: title
+  })
 });
 
 let data=await response.json();
