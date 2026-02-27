@@ -3,8 +3,8 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Competition Table Allotment</title>
-<style>
 
+<style>
 body{
 margin:0;
 font-family:Arial;
@@ -23,6 +23,7 @@ border-radius:15px;
 width:90%;
 max-width:380px;
 text-align:center;
+box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
 select,input,button{
@@ -49,9 +50,9 @@ margin-top:15px;
 min-height:25px;
 font-weight:bold;
 }
-
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -72,19 +73,10 @@ font-weight:bold;
 
 <script>
 
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbw-HMPtwRpBBVcxFKakxe7DZy_skPOqgTzU9_eJ0dPrBjoQurTSz8Jv-M5eiB7bikcc/exec";
-
-let submitting=false;
-
-let deviceId = localStorage.getItem("deviceId");
-if(!deviceId){
-deviceId = Date.now()+"_"+Math.random();
-localStorage.setItem("deviceId", deviceId);
-}
+// ⚠ Use your latest deployment URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-HMPtwRpBBVcxFKakxe7DZy_skPOqgTzU9_eJ0dPrBjoQurTSz8Jv-M5eiB7bikcc/exec";
 
 async function allot(){
-
-if(submitting) return;
 
 let category=document.getElementById("category").value;
 let title=document.getElementById("title").value.trim();
@@ -95,40 +87,46 @@ alert("Enter valid title");
 return;
 }
 
-submitting=true;
 btn.disabled=true;
 document.getElementById("result").innerHTML="Assigning...";
 
 try{
 
-let response=await fetch(SCRIPT_URL,{
-method:"POST",
-body:JSON.stringify({category,title,deviceId})
-});
+// Send parameters using GET (matches doGet backend)
+let url = SCRIPT_URL +
+"?category=" + encodeURIComponent(category) +
+"&title=" + encodeURIComponent(title);
 
-let data=await response.json();
+let response = await fetch(url);
+let data = await response.json();
 
 if(data.status==="duplicate"){
 document.getElementById("result").innerHTML="⚠ Title already registered!";
+btn.disabled=false;
 }
 else if(data.status==="full"){
 document.getElementById("result").innerHTML="❌ No tables available.";
+btn.disabled=false;
 }
 else if(data.status==="success"){
 document.getElementById("result").innerHTML=
-"✅ Your Table Number:<br><span style='font-size:30px'>"+data.table+"</span>";
+"✅ Your Table Number:<br><span style='font-size:30px'>" + data.table + "</span>";
 document.getElementById("title").value="";
 }
+else if(data.status==="running"){
+document.getElementById("result").innerHTML="⚠ Please try again.";
+btn.disabled=false;
+}
 else{
-document.getElementById("result").innerHTML="❌ Error. Try again.";
+document.getElementById("result").innerHTML="❌ Unexpected response.";
+btn.disabled=false;
 }
 
 }catch(err){
 document.getElementById("result").innerHTML="❌ Network issue.";
+btn.disabled=false;
 }
 
-btn.disabled=false;
-submitting=false;
 }
 
 </script>
